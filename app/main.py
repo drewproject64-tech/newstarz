@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher
-from aiogram.filters import CommandStart
+from aiogram.filters import Command, CommandStart
 from aiogram.types import BufferedInputFile, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -15,6 +15,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_IDS = {int(value.strip()) for value in os.getenv("ADMIN_IDS", "6016750433").split(",") if value.strip().isdigit()}
+
+# Unique users who have started the bot. This is kept in memory for this worker instance.
+started_users: set[int] = set()
 
 START_IMAGE = Path(os.getenv("START_IMAGE", "assets/start.jpg"))
 WITHDRAWAL_IMAGES = [
@@ -156,9 +160,21 @@ def schedule_user(user_id: int) -> None:
     jobs[user_id] = job
 
 
+@dp.message(Command("admin_stats"))
+async def admin_stats_handler(message: Message) -> None:
+    user_id = message.from_user.id
+
+    if user_id not in ADMIN_IDS:
+        await message.answer("Bu komutu kullanma yetkiniz yok.")
+        return
+
+    await message.answer(f"👥 Total Users: {len(started_users)}")
+
+
 @dp.message(CommandStart())
 async def start_handler(message: Message) -> None:
     user_id = message.from_user.id
+    started_users.add(user_id)
 
     start_photo = get_prepared_image(START_IMAGE)
 
