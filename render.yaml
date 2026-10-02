@@ -1,0 +1,9 @@
+services:
+  - type: worker
+    name: newstarz
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
