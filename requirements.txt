@@ -1,1 +1,2 @@
-aiogram>=3.25,<4.0\nAPScheduler>=3.10,<4.0\n
+aiogram>=3.25,<4.0
+APScheduler>=3.10,<4.0
